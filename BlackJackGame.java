@@ -6,8 +6,9 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class BlackJackGame extends game {
-    private BaralhoJogador playerExtra;
+    private BaralhoJogador playerExtra; // caso split_option seja utilizado, ele utiliza esse baralho 
     int indice = 0;
+    
     public int getIndice() {
         return indice;
     }
@@ -16,14 +17,10 @@ public class BlackJackGame extends game {
         this.indice = indice;
     }
 
-    //https://www.fulltilt.com/pt-BR/casino/games/blackjack/rules/?no_redirect=1https://www.fulltilt.com/pt-BR/casino/games/blackjack/rules/?no_redirect=1
-    //https://www.casinotop10.com.br/blackjack-gratis REFERENCIA
+    // https://www.fulltilt.com/pt-BR/casino/games/blackjack/rules/?no_redirect=1https://www.fulltilt.com/pt-BR/casino/games/blackjack/rules/?no_redirect=1
+    // https://www.casinotop10.com.br/blackjack-gratis REFERENCIA
     // https://www.guiacasinoonline.com/regras-do-blackjack/ referencia principal
-    // DICIONARIO ENDGAME: 0 FALSO / 1 DEALER GANHA / 2 PLAYER GANHA / 3 EMPATE
-
-    // verificar finalização de jogo com split option
-    // ranking arraylist
-    // testar bugs
+    // DICIONARIO ENDGAME: 0 FALSO / 1 DEALER GANHA / 2 PLAYER GANHA / 3 EMPATE / 10 NÃO JOGAR NOVAMENTE
 
     @Override // HERANÇA
     public void jogar(List<Dado> ranking) { // jogar inicial
@@ -45,24 +42,29 @@ public class BlackJackGame extends game {
         setValorApostado(First_run(baralho, dealer, player));  // inicio de jogo
         player.setGrana(player.getGrana() - getValorApostado());
         Clear_Screen();
-
-        // forçar split
+        
+        // modos pra desenvolvimento, necessário pra testar funções
+        // forçar split: força que o baralho principal possua duas cartas iguais na primeira rodada pra poder liberar o metodo split() no menu de maneira facilitada
+        /* forçar split
         player.setPontos(-player.getPontos());
         player.getCartas()[1] = player.getCartas()[0];
         player.setPontos(getNum(String.valueOf(player.getCartas()[0].getFace()), player)); // adiciona valor baseado na face da carta
         player.setPontos(getNum(String.valueOf(player.getCartas()[0].getFace()), player)); // adiciona valor baseado na face da carta
-        // fim forçar split
+        fim forçar split
+        */
 
-        /*// forçar black jack
+        // forçar black jack: força que o baralho principal possua 21 pontos com duas cartas iniciais, pra testar o funcionamento de maneira facilitada
+        /* forçar black jack
         player.setPontos(-player.getPontos());
         player.setPontos(21);
-        // fim forçar black jack*/
+        fim forçar black jack
+        */
 
-        this.setEndgame(0);
+        this.setEndgame(0); 
         do {
             VerificarJogada(player, dealer); // função pra verificar e marcar se o jogo acabou
             if (FimJogo(player, dealer)) {
-                if (reset(player, ranking)) // metodo pra continuar jogando
+                if (reset(player)) // metodo pra continuar jogando
                     jogar(player, ranking);
                 else
                     AddRank(player, ranking);
@@ -75,7 +77,7 @@ public class BlackJackGame extends game {
     } // jogar inicial
 
     // POLIMORFISMO DE SOBRECARGA
-    public void jogar(BaralhoJogador player, List<Dado> ranking) { // RESET // SOBRECARGA
+    public void jogar(BaralhoJogador player, List<Dado> ranking) { // caso selecionado jogar novamente na função "reset", é utilizado esse jogar // SOBRECARGA
         if (this.getEndgame() == 10)
             return;
         Scanner sc = new Scanner(System.in);
@@ -104,7 +106,7 @@ public class BlackJackGame extends game {
         do {
             VerificarJogada(player, dealer); // função pra verificar e marcar se o jogo acabou
             if (FimJogo(player, dealer)) {
-                if (reset(player, ranking)) // metodo pra continuar jogando
+                if (reset(player)) // metodo pra continuar jogando
                     jogar(player, ranking);
                 else
                     AddRank(player, ranking);
@@ -115,6 +117,7 @@ public class BlackJackGame extends game {
             Clear_Screen();
         } while (true);
     } // OK
+    
     @Override
     public void Menu(Baralho baralho, BaralhoJogador player, BaralhoJogador dealer, Scanner sc) { // menu principal
         System.out.println("[1] Hit\n[2] Stand\n[3] Double\n[4] Split\n[5] Help\n[6] Quit\n"); // opções do menu
@@ -244,10 +247,10 @@ public class BlackJackGame extends game {
 
     public void Stand_option(Baralho baralho, BaralhoJogador dealer, BaralhoJogador player) { // realiza uma ultima compra
         do {
-            Hit_option(baralho, dealer);
-            VerificarJogada(player, dealer);
-        } while (dealer.getPontos() <= player.getPontos() && dealer.getPontos() <= 21); //
-        if (playerExtra != null) {
+            Hit_option(baralho, dealer); // compra cartas para o dealer
+            VerificarJogada(player, dealer); // verifica se é possível terminar o jogo
+        } while (dealer.getPontos() <= player.getPontos() && dealer.getPontos() <= 21); 
+        if (playerExtra != null) { // verifica se o split foi utilizado 
             Clear_Screen();
             playerExtra.imprimir_cartas();
             dealer.imprimir_cartas();
@@ -286,7 +289,7 @@ public class BlackJackGame extends game {
                     System.out.println(" GANHOU! ");
                 }
             }
-            // EMPATE COM BLACK
+            // EMPATE COM BLACK JACK
             else if (dealer.getPontos() == 21 || playerExtra.getPontos() == 21) {
                 if (dealer.getLastCard() == 2) {
                     if (playerExtra.getLastCard() == 2)
@@ -343,6 +346,7 @@ public class BlackJackGame extends game {
         scanner.nextLine();
     } // OK
     // fim opções do menu
+    
     public void Time(){
         Scanner sc = new Scanner((System.in));
         System.out.println("APERTE ENTER PARA PROSSEGUIR!");
@@ -385,7 +389,6 @@ public class BlackJackGame extends game {
     } // OK
 
     public boolean FimJogo(BaralhoJogador player, BaralhoJogador dealer) { // confere as marcações de fim de jogo
-
         if (this.getEndgame() == 1 || this.getEndgame() == 2 || this.getEndgame() == 3) { // derrota, vitoria, empate
             player.imprimir_cartas();
             dealer.imprimir_cartas();
@@ -479,7 +482,7 @@ public class BlackJackGame extends game {
         return aposta;
     } // OK
 
-    public int getNum(String carta, BaralhoJogador deck) {
+    public int getNum(String carta, BaralhoJogador deck) { // enum pra dar valores as cartas
         switch (carta) {
             case "AS":
                 for (int i = 0; i < 5; i++) {
@@ -532,7 +535,7 @@ public class BlackJackGame extends game {
         setIndice(getIndice() + 1);
     }  //OK
 
-    public boolean reset(BaralhoJogador player, List<Dado> ranking) { // metodo pra reiniciar o jogo mantendo o mesmo jogador
+    public boolean reset(BaralhoJogador player) { // metodo pra reiniciar o jogo mantendo o mesmo jogador
         System.out.println("Deseja jogar novamente?");
         Scanner sc = new Scanner(System.in);
         String opcao = sc.next().toUpperCase(Locale.ROOT);

@@ -1,6 +1,6 @@
 package BlackJack;
 
-public class Dado {
+public class Dado { //um Dado no arraylist do ranking
     private String nome;
     private final int[] winsloses;
 

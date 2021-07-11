@@ -28,5 +28,5 @@ public abstract class game {
 
     public abstract void Menu(Baralho baralho, BaralhoJogador player, BaralhoJogador dealer, Scanner sc);
 
-    public abstract boolean reset(BaralhoJogador player, List<Dado> ranking);
+    public abstract boolean reset(BaralhoJogador player);
 }

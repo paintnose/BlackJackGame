@@ -1,14 +1,14 @@
 package BlackJack;
 
-public class BaralhoJogador{
-    private final String user;
+public class BaralhoJogador{ // baralho utilizando por jogadores: player e dealer(npc)
+    private final String user; // nome do usuario do baralho
     private float grana;
-    private Carta[] cartas;
-    private int lastCard;
-    private int pontos;
-    private final int[] WL;
+    private Carta[] cartas; // as cartas que vao possuir
+    private int lastCard; // a posição da ultima carta
+    private int pontos; // pontuação das cartas
+    private final int[] WL; // vetor de vitórias - posição[0] e derrotas - posição[1]
 
-    public BaralhoJogador(String user) {
+    public BaralhoJogador(String user) { 
         this.user = user;
         this.lastCard = 0;
         this.cartas = new Carta[5];
